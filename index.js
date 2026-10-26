@@ -23,8 +23,6 @@ const app = express();
 app.set('trust proxy', true);
 app.use(express.json());
 app.use('/public', express.static(path.join(__dirname, 'public'), { etag: false, maxAge: 0 }));
-app.use('/api/setup', setupApi.router);
-app.get('/setup', (req, res) => res.sendFile(path.join(__dirname, 'public', 'setup.html')));
 
 // WebDAV protocol discovery: intercept OPTIONS /dav before CORS ends with 204
 app.use((req, res, next) => {
@@ -3313,7 +3311,12 @@ function printUrlBanner(label, urlStr) {
         });
       }
 
-      const configured = setupApi.isConfigured();
+    const configured = Boolean(
+      process.env.TELEGRAM_API_ID &&
+      process.env.TELEGRAM_API_HASH &&
+      process.env.TELEGRAM_SESSION_STRING &&
+      process.env.TELEGRAM_CHANNEL
+  );
       const shouldOpenBrowser = !configured || process.env.OPEN_BROWSER === 'true' || process.argv.includes('--open');
       if (shouldOpenBrowser) {
         setTimeout(() => {
